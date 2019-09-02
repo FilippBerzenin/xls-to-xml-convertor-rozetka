@@ -11,37 +11,33 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 
 import lombok.extern.java.Log;
 
 @Log
 public class JFrameForArgs {
 
-	private Path workingDirectoryPath;
+	private Path pathForExcelFile;
 
 	public void createGUI() {
-		JFrame f = new JFrame("Backup service - client");
+		JFrame f = new JFrame("XLS to XML (Rozetka) konvertor");
 		f.setLocation(450, 250);
-		JLabel lab = new JLabel("Please, enter parametrs for connect with server");
+		JLabel lab = new JLabel("Please, enter path for Excel");
 		lab.setBounds(10, 10, 300, 30);
-		JTextField workingDirectory = new JTextField("C:\\client\\dir1");
-		workingDirectory.setBounds(10, 40, 230, 30);
+		JTextField pathToFile = new JTextField("C:\\client\\dir1");
+		pathToFile.setBounds(10, 40, 230, 30);
 		JButton dir = new JButton("Select...");		
 		dir.setBounds(260, 40, 100, 30);
-		JTextField ipServer = new JTextField("localhost");
-		ipServer.setBounds(10, 80, 230, 30);
-		JTextField port = new JTextField("3345");
-		port.setBounds(10, 120, 230, 30);
 		JButton b = new JButton("Submit");
 		b.setBounds(100, 180, 100, 40);
 		JLabel label1 = new JLabel();
 		label1.setBounds(10, 110, 200, 100);
 		f.add(lab);
 		f.add(label1);
-		f.add(workingDirectory);
+		f.add(pathToFile);
 		f.add(dir);
-		f.add(ipServer);
-		f.add(port);
 		f.add(b);
 		f.setSize(400, 300);
 		f.setLayout(null);
@@ -52,10 +48,10 @@ public class JFrameForArgs {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					workingDirectoryPath = Paths.get(workingDirectory.getText());
-					log.info(workingDirectoryPath.toString());
+					pathForExcelFile = Paths.get(pathToFile.getText());
+					log.info(pathForExcelFile.toString());
 					f.dispose();
-					new App(workingDirectoryPath);
+					new App(pathForExcelFile);
 					label1.setText("Args has been submitted.");
 				} catch (NumberFormatException e) {
 					label1.setText("Args have error values.");
@@ -66,28 +62,20 @@ public class JFrameForArgs {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				workingDirectory.setText(drectoryChosen());				
+				pathToFile.setText(fileChosen());				
 			}
 		});
 	}
 	
-	private String drectoryChosen() {
-	    JFileChooser chooser = new JFileChooser();
-	    try {
-	    chooser.setCurrentDirectory(new File("."));
-	    chooser.setDialogTitle("Select directory");
-	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	    chooser.setAcceptAllFileFilterUsed(false);
-		    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-			      System.out.println("getSelectedFile() : " + chooser.getSelectedFile());
-			    } else {
-			      System.out.println("No Selection ");
-			    }
-			    log.info(chooser.getSelectedFile().toString());
-			    return chooser.getSelectedFile().toString();
-	    } catch (NullPointerException e) {
-	    	
-	    }
+	private String fileChosen() {
+		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+		jfc.addChoosableFileFilter(new FileNameExtensionFilter("*xls", "Excel file"));
+		int returnValue = jfc.showOpenDialog(null);
+		if (returnValue == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = jfc.getSelectedFile();
+			log.info(selectedFile.getAbsolutePath());
+			return selectedFile.getAbsolutePath();
+		}
 	    return "none";
 	}
 }
