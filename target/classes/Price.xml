@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE yml_catalog SYSTEM "shops.dtd">
+		<yml_catalog date="2019-09-03 11:07">
+		<shop>
+			<name>DXTR</name>
+			<company>Беспалов Дмитрий Александрович</company>
+			<url>https://site.in.ua</url>
+			<currencies>
+				<currency id="UAH" rate="1"/>
+			</currencies>
+			<categories>
+				<category id="1">Головные уборы</category>
+				<category id="2">Мужские футболки</category>
+				<category id="3">Мужские свитшоты</category>
+				<category id="4">Мужские худые</category>
+				<category id="5">Спортивные штаны</category>
+				<category id="6">Мужские поло</category>
+				<category id="7">Мужские шорты</category>
+				<category id="8">Мужские ветровки</category>
+				<category id="9">Мужские майки</category>
+				<category id="10">Мужские лонгсливы</category>
+				<category id="11">Рюкзаки</category>
+				<category id="12">Мужские джинсовые куртки</category>
+				<category id="13">Пляжные шорты и плавки</category>
+				<category id="14">Анорак мужской</category>
+				<category id="15">Мужские демисезонные куртки</category>
+				<category id="16">Мужские бомберы</category>
+				<category id="17">Мужские спортивные костюмы</category>
+			</categories>
+    <offers>
+  <offer available="true" id="1000000001">
+	 <price_old>251</price_old>
+	 <price>199</price>
+    <currencyId>UAH</currencyId>
+    <categoryId>1</categoryId>
+    <picture>https://pp.userapi.com/c854124/v854124079/a4213/C6_JXPT5nxc.jpg</picture>
+	<picture>https://pp.userapi.com/c854124/v854124079/a4203/8OYmI_pXtAY.jpg</picture>
+	<picture>https://pp.userapi.com/c854124/v854124079/a420b/CF_nkBun9vI.jpg</picture>
+     <stock_quantity>100</stock_quantity>
+    <vendor>SOL’S</vendor>
+    <name>Бейсболка SOL’S BUFFALO 88100 One Size Желтая	(1000000001)</name>
+    <description><![CDATA[<p>Бейсболка из 6 клиньев SOL’S BUFFALO.</p><p>•One size(универсальный размер), регулируемый сзади.</p><p>•Высочайшее качество материалов и пошива.</p><p>•Материал: 100% Canvas Cotton.</p><p>•Уникальная модель, ощутимое европейской качество.</p><p>•Категория: Унисекс</p><p>•Размер: Взрослый</p>]]></description>
+    <param name="Вид">Кепки</param>
+	<param name="Категория">Для женщин,Для мужчин,Унисекс</param>
+	<param name="Цвет">Желтый</param>
+	<param name="Состав">100% хлопок</param>
+	<param name="Размер">One Size</param>
+	<param name="Страна-производитель товара">Франция</param>
+	<param name="Страна регистрации бренда">Франция</param>
+	<param name="Артикул">DX00001</param>
+	<param name="Доставка/Оплата">Срок доставки 2 дня</param>
+	<param name="Гарантия">14 дней </param>
+  </offer>
+<offer available="false" id="1000000002">
+    <price_old>500</price_old>
+	<price>350</price>
+    <currencyId>UAH</currencyId>
+    <categoryId>11</categoryId>
+    <picture>https://sun9-24.userapi.com/c857524/v857524403/3fc6f/RVx-teFwJ_M.jpg</picture>
+	<picture>https://sun9-16.userapi.com/c857524/v857524403/3fc78/WLK91Ryo6as.jpg</picture>
+    <stock_quantity>0</stock_quantity>
+    <vendor>Sol's</vendor>
+    <name>Рюкзак Classic BAD BOY с белым принтом 43х28х21 см Черный (1000000002)</name>
+   <description><![CDATA[<p>•Высококачественная Европейская ткань и пошив.</p><p>•Материал с водоотталкивающей пропиткой.</p><p>•Вместительное центральное отделение.</p><p>•Отверстие для телефонной гарнитуры.</p><p>•Полностью прошит армированной нитью.</p><p>•Прочный,износоустойчивый материал.</p><p>•Усиленные регулируемые лямки с набивкой;</p><p>•Эргономическая спинка.</p><p>•Размеры: 43х28х21 см.</p>]]></description>
+    <param name="Размер">43х28х21 см</param>
+	<param name="Цвет">Черный</param>
+	<param name="Тип">Рюкзаки</param>
+	<param name="Объем">15.7 л</param>
+	<param name="Назначение">Для пешего и горного туризма</param>
+	<param name="Материал">100% полиэстер</param>
+	<param name="Регулировка плечевых лямок по вертикали">Есть</param>
+	<param name="Вес">0.37 кг</param>
+	<param name="Страна-производитель товара">Франция</param>
+	<param name="Страна регистрации бренда">Франция</param>
+	<param name="Артикул">DX00002</param>
+	<param name="Доставка/Оплата">Срок доставки 2 дня</param>
+	<param name="Гарантия">14 дней </param>
+  </offer>
+  <offer available="true" id="1000000003">
+    <price_old>1150</price_old>
+	<price>1049</price>
+    <currencyId>UAH</currencyId>
+    <categoryId>14</categoryId>
+    <picture>https://sun9-33.userapi.com/c855428/v855428929/c2272/uR1ESXsWGvs.jpg</picture>
+	<picture>https://pp.userapi.com/c855428/v855428929/c227c/feEgUW54Hnw.jpg</picture>
+	<picture>https://sun9-39.userapi.com/c855428/v855428929/c2286/QqJ1oN148fg.jpg</picture>
+	<picture>https://sun9-33.userapi.com/c855428/v855428929/c2290/0nDNljaj1jE.jpg</picture>
+	<picture>https://pp.userapi.com/c855428/v855428929/c229a/FV-kcfpWkYs.jpg</picture>
+	<picture>https://sun9-30.userapi.com/c855428/v855428929/c22a4/-i5gnOyrgMs.jpg</picture>
+    <stock_quantity>100</stock_quantity>
+    <vendor>Classic</vendor>
+    <name>Ветровка анорак Classic с сумкой-чехлом Streetz Packable Anorak With Bag  L Черный (1000000003)</name>
+   <description><![CDATA[Ветровка складывается в компактную(21*16 см) сумку-чехол на молнии, которая идёт в комплекте. Сумку можно использовать отдельно как стильный спортивный аксессуар.<p>•Очень продуманная и практичная ветровка.</p><p>•Непревзойденная защита от дождя и ветра.</p><p>•Высочайшее качество материалов и пошива.</p><p>•Прочная и надёжная европейская фурнитура.</p><p>•Материал - 100% Polyester.</p><p>•Внутри сеточная подкладка.</p><p>•Удобные карманы для рук, закрываются на молнии.</p><p>•Внизу передней части огромный основной карман на молнии.</p><p>•На спине по бокам трикотажные вставки, благодаря которым ветровка не будет сковывать движения.</p><p>•Проверенный классический крой обеспечит идеальную посадку на любую фигуру.</p><p>•Ветровка складывается в компактную(21*16 см) сумку-чехол на молнии с фирменным логотипом бренда.</p><p>•Сумку из комплекта также можно использовать отдельно как стильный спортивный аксессуар.</p><p>•Лимитированная модель.</p><p>•Оригинальная жаккардовая бирка бренда и навесная картонная этикетка.</p><p>•Гарантия длительной эксплуатации изделия без потери формы и цвета.</p>]]></description>
+    <param name="Размер">L</param>
+	<param name="Цвет">Черный</param>
+	<param name="Сезон">Осенне-весенний</param>
+	<param name="Стиль">Повседневный (casual)</param>
+	<param name="Температурный режим">Для средних температур</param>
+	<param name="Особенности модели">Складывается в компактную(21*16 см)сумку-чехол</param>
+	<param name="Страна-производитель товара">Турция</param>
+	<param name="Страна регистрации бренда">Турция</param>
+	<param name="Артикул">DX00003</param>
+	<param name="Доставка/Оплата">Срок доставки 2 дня</param>
+	<param name="Гарантия">14 дней </param>
+  </offer>
+      </offers>
+  </shop>
+</yml_catalog>

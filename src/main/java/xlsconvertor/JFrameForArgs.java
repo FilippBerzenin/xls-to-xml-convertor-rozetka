@@ -27,7 +27,7 @@ public class JFrameForArgs {
 		f.setLocation(450, 250);
 		JLabel lab = new JLabel("Please, enter path for Excel");
 		lab.setBounds(10, 10, 300, 30);
-		JTextField pathToFile = new JTextField("C:\\client\\dir1");
+		JTextField pathToFile = new JTextField("C:\\workspace\\xlsconvertor\\src\\main\\resources\\rozetka.xlsx");
 		pathToFile.setBounds(10, 40, 230, 30);
 		JButton dir = new JButton("Select...");		
 		dir.setBounds(260, 40, 100, 30);
@@ -69,8 +69,9 @@ public class JFrameForArgs {
 	}
 	
 	private String fileChosen() {
-		JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-		jfc.addChoosableFileFilter(new FileNameExtensionFilter("*xls", "Excel file"));
+		File homeDirectory  = new File(App.localDirectory);
+		JFileChooser jfc = new JFileChooser(homeDirectory);
+		jfc.addChoosableFileFilter(new FileNameExtensionFilter( "Excel file", "*xls", "xlsx"));
 		int returnValue = jfc.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			File selectedFile = jfc.getSelectedFile();
