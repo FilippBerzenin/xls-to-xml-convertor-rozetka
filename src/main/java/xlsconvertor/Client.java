@@ -1,20 +1,20 @@
 package xlsconvertor;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Iterator;
+import java.util.concurrent.Callable;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
 
 @Log
-public class Client implements Runnable {
+public class Client implements Callable<String> {
 
 	private Path pathFoFile;
 
@@ -32,31 +32,31 @@ public class Client implements Runnable {
 //		Workbook workbook = null;
 		try (Workbook workbook = WorkbookFactory.create(pathFoFile.toFile())) {
 			if (workbook == null) {
-				log.severe("Tomething wrong with WorkbookFactory "+pathFoFile);
+				log.severe("Tomething wrong with WorkbookFactory " + pathFoFile);
 				return;
 			}
-	        System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
-	        workbook.forEach(sheet -> {
-	            System.out.println("=> " + sheet.getSheetName());
-	        });
-	        System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
-	        workbook.forEach(sheet -> {
-	            System.out.println("=> " + sheet.getSheetName());
-	        });
-	        Sheet sheet = workbook.getSheetAt(0);
+			System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
+			workbook.forEach(sheet -> {
+				System.out.println("=> " + sheet.getSheetName());
+			});
+			System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
+			workbook.forEach(sheet -> {
+				System.out.println("=> " + sheet.getSheetName());
+			});
+			Sheet sheet = workbook.getSheetAt(0);
 
-	        // Create a DataFormatter to format and get each cell's value as String
-	        DataFormatter dataFormatter = new DataFormatter();
-	        System.out.println("\n\nIterating over Rows and Columns using Java 8 forEach with lambda\n");
-	        sheet.forEach(row -> {
-	            row.forEach(cell -> {
-	                String cellValue = dataFormatter.formatCellValue(cell);
-	                System.out.print(cellValue + "\t");
-	            });
-	            System.out.println();
-	        });
+			// Create a DataFormatter to format and get each cell's value as String
+			DataFormatter dataFormatter = new DataFormatter();
+			System.out.println("\n\nIterating over Rows and Columns using Java 8 forEach with lambda\n");
+			sheet.forEach(row -> {
+				row.forEach(cell -> {
+					String cellValue = dataFormatter.formatCellValue(cell);
+					System.out.print(cellValue + "\t");
+				});
+				System.out.println();
+			});
 
-	        // Closing the workbook
+			// Closing the workbook
 //	        try {
 //				workbook.close();
 //			} catch (IOException e) {
@@ -65,13 +65,13 @@ public class Client implements Runnable {
 //			}
 //			workbook = WorkbookFactory.create(pathFoFile.toFile());
 		} catch (EncryptedDocumentException e) {
-			log.severe("Tomething wrong with WorkbookFactory "+pathFoFile);
+			log.severe("Tomething wrong with WorkbookFactory " + pathFoFile);
 			e.printStackTrace();
 		} catch (InvalidFormatException e) {
-			log.severe("Tomething wrong with WorkbookFactory "+pathFoFile);
+			log.severe("Tomething wrong with WorkbookFactory " + pathFoFile);
 			e.printStackTrace();
 		} catch (IOException e) {
-			log.severe("Tomething wrong with WorkbookFactory "+pathFoFile);
+			log.severe("Tomething wrong with WorkbookFactory " + pathFoFile);
 			e.printStackTrace();
 		}
 		// Get first sheet from the workbook
@@ -91,19 +91,19 @@ public class Client implements Runnable {
 //            System.out.println("=> " + sheet.getSheetName());
 //        }
 
-        // 3. Or you can use a Java 8 forEach with lambda
+		// 3. Or you can use a Java 8 forEach with lambda
 //        System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
 //        workbook.forEach(sheet -> {
 //            System.out.println("=> " + sheet.getSheetName());
 //        });
 
-        /*
-           ==================================================================
-           Iterating over all the rows and columns in a Sheet (Multiple ways)
-           ==================================================================
-        */
+		/*
+		 * ================================================================== Iterating
+		 * over all the rows and columns in a Sheet (Multiple ways)
+		 * ==================================================================
+		 */
 
-        // Getting the Sheet at index zero
+		// Getting the Sheet at index zero
 //        Sheet sheet = workbook.getSheetAt(0);
 //
 //        // Create a DataFormatter to format and get each cell's value as String
@@ -136,7 +136,7 @@ public class Client implements Runnable {
 //            System.out.println();
 //        }
 
-        // 3. Or you can use Java 8 forEach loop with lambda
+		// 3. Or you can use Java 8 forEach loop with lambda
 //        System.out.println("\n\nIterating over Rows and Columns using Java 8 forEach with lambda\n");
 //        sheet.forEach(row -> {
 //            row.forEach(cell -> {
@@ -153,6 +153,11 @@ public class Client implements Runnable {
 //			log.severe("Tomething wrong with WorkbookFactory "+pathFoFile);
 //			e.printStackTrace();
 //		}
-    }	
+	}
+
+	@Override
+	public String call() throws Exception {
+		return "Ok";
+	}
 
 }

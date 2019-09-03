@@ -20,6 +20,7 @@ import lombok.extern.java.Log;
 public class JFrameForArgs {
 
 	private Path pathForExcelFile;
+	private Client convertor;
 
 	public void createGUI() {
 		JFrame f = new JFrame("XLS to XML (Rozetka) konvertor");
@@ -51,14 +52,14 @@ public class JFrameForArgs {
 					pathForExcelFile = Paths.get(pathToFile.getText());
 					log.info(pathForExcelFile.toString());
 					f.dispose();
-					new App(pathForExcelFile);
+					startClient(pathForExcelFile);
 					label1.setText("Args has been submitted.");
 				} catch (NumberFormatException e) {
 					label1.setText("Args have error values.");
 				}
 			}
 		});
-		dir.addActionListener( new ActionListener() {
+		dir.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -77,5 +78,11 @@ public class JFrameForArgs {
 			return selectedFile.getAbsolutePath();
 		}
 	    return "none";
+	}
+	
+	private void startClient(Path pathForExcelFile) {
+		log.info("File (Excel): " + pathForExcelFile);
+		convertor = new Client(pathForExcelFile);
+		convertor.run();
 	}
 }
