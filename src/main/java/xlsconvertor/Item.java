@@ -1,5 +1,7 @@
 package xlsconvertor;
 
+import java.util.Map;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,9 +13,9 @@ public class Item {
 	
 	private String available;
 	
-	private double price_old;
+	private String price_old;
 	
-	private double price;
+	private String price;
 	
 	private String currencyId;
 	
@@ -21,7 +23,7 @@ public class Item {
 	
 	private String[] linksForPicture;
 	
-	private int stock_quantity;
+	private String stock_quantity;
 	
 	private String vendor;
 	
@@ -29,6 +31,6 @@ public class Item {
 	
 	private String description;
 	
-	private String[] parameters;
+	private Map<String, String> parameters;
 
 }
