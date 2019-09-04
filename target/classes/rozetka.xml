@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE yml_catalog SYSTEM "shops.dtd">
-<yml_catalog date="2019-09-04 13:44">
+<yml_catalog date="2019-09-04 13:46">
         <shop>
                 <name>smot</name>
                 <company>Мищенко Дмитрий Александрович</company>
@@ -52,9 +52,8 @@
                                 <price>500.0</price>
                                 <currencyId>UAH</currencyId>
                                 <categoryId>11.0</categoryId>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a4213/C6_JXPT5nxc.jpg</picture>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a4203/8OYmI_pXtAY.jpg</picture>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a420b/CF_nkBun9vI.jpg</picture>
+                                <picture>https://sun9-24.userapi.com/c857524/v857524403/3fc6f/RVx-teFwJ_M.jpg</picture>
+                                <picture>https://sun9-16.userapi.com/c857524/v857524403/3fc78/WLK91Ryo6as.jpg</picture>
                                 <stock_quantity>11</stock_quantity>
                                 <vendor>Classic</vendor>
                                 <name>Рюкзак Classic BAD BOY с белым принтом 43х28х21 см  Черный (1000000002)</name>
@@ -73,9 +72,12 @@
                                 <price>1150.0</price>
                                 <currencyId>UAH</currencyId>
                                 <categoryId>14.0</categoryId>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a4213/C6_JXPT5nxc.jpg</picture>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a4203/8OYmI_pXtAY.jpg</picture>
-                                <picture>https://pp.userapi.com/c854124/v854124079/a420b/CF_nkBun9vI.jpg</picture>
+                                <picture>https://sun9-33.userapi.com/c855428/v855428929/c2272/uR1ESXsWGvs.jpg</picture>
+                                <picture>https://pp.userapi.com/c855428/v855428929/c227c/feEgUW54Hnw.jpg</picture>
+                                <picture>https://sun9-39.userapi.com/c855428/v855428929/c2286/QqJ1oN148fg.jpg</picture>
+                                <picture>https://sun9-33.userapi.com/c855428/v855428929/c2290/0nDNljaj1jE.jpg</picture>
+                                <picture>https://pp.userapi.com/c855428/v855428929/c229a/FV-kcfpWkYs.jpg</picture>
+                                <picture>https://sun9-30.userapi.com/c855428/v855428929/c22a4/-i5gnOyrgMs.jpg</picture>
                                 <stock_quantity>14</stock_quantity>
                                 <vendor>Classic</vendor>
                                 <name>Ветровка анорак  Classic  с сумкой-чехлом Streetz Packable Anorak With Bag L Черный (1000000002)</name>

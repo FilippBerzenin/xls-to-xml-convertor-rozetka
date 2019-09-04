@@ -261,9 +261,7 @@ public class XlsToXmlConvertor implements Callable<String> {
 			.price(sheet.getRow(i).getCell(5).getNumericCellValue())
 			.currencyId(sheet.getRow(i).getCell(6).toString())
 			.categoryId(sheet.getRow(i).getCell(1).toString())
-			//TODO
 			.linksForPicture(sheet.getRow(i).getCell(7).getStringCellValue().split("\n"))
-			
 			.stock_quantity((int)sheet.getRow(i).getCell(1).getNumericCellValue())
 			.vendor(sheet.getRow(i).getCell(8).getStringCellValue())
 			.name(sheet.getRow(i).getCell(9).getStringCellValue())
