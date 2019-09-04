@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileSystemView;
 
 import lombok.extern.java.Log;
 
@@ -20,7 +19,7 @@ import lombok.extern.java.Log;
 public class JFrameForArgs {
 
 	private Path pathForExcelFile;
-	private Client convertor;
+	private XlsToXmlConvertor convertor;
 
 	public void createGUI() {
 		JFrame f = new JFrame("XLS to XML (Rozetka) konvertor");
@@ -83,7 +82,7 @@ public class JFrameForArgs {
 	
 	private void startClient(Path pathForExcelFile) {
 		log.info("File (Excel): " + pathForExcelFile);
-		convertor = new Client(pathForExcelFile);
+		convertor = new XlsToXmlConvertor(pathForExcelFile);
 		convertor.run();
 	}
 }

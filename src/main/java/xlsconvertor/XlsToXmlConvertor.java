@@ -2,8 +2,10 @@ package xlsconvertor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,25 +38,28 @@ import org.w3c.dom.Element;
 import lombok.extern.java.Log;
 
 @Log
-public class Client implements Callable<String> {
+public class XlsToXmlConvertor implements Callable<String> {
 
 	private Path pathFoFile;
 	private Map<String, String> shopProperties;
 	private Map<Integer, String> categories;
 	private Map<Integer, Item> offers;
 
-	public Client(Path pathFoFile) {
+	public XlsToXmlConvertor(Path pathFoFile) {
 		this.pathFoFile = pathFoFile;
 	}
 
 	public void run() {
 		System.out.println("Start-----------------------" + pathFoFile);
 		this.readExcelFile(pathFoFile);
-		this.createXmlFile(Paths.get(App.xmlFilesName));
+		this.createXmlFile(pathFoFile);
 	}
 
-	private void createXmlFile(Path pathXmlFile) {
-		log.info("Xml file name: " + pathXmlFile.getFileName());
+	private void createXmlFile(Path pathToXlsFile) {
+		Path pathForXmlFile = Paths.get(pathToXlsFile.toString()
+				.replace("xlsx", "xml")
+				.replace("xls", "xml"));
+		log.info("Xml file name: " + pathForXmlFile.getFileName());
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 			document.setXmlStandalone(true);
@@ -86,7 +91,7 @@ public class Client implements Callable<String> {
 			
 			DOMSource source = new DOMSource(document);
 			StreamResult result = new StreamResult(
-					new File(System.getProperty("user.dir") + File.separator + pathXmlFile.getFileName()));
+					new File(App.localDirectory + pathForXmlFile.getFileName()));
 			transformer.transform(source, result);
 			System.out.println("Дokymeнт coхpaнeн!");
 
@@ -113,14 +118,35 @@ public class Client implements Callable<String> {
 			offer.appendChild(price);
 			Element currencyId = document.createElement("currencyId");
 			currencyId.setTextContent(value.getCurrencyId());
-			offer.appendChild(currencyId);
+			offer.appendChild(currencyId);			
 			Element categoryId = document.createElement("categoryId");
 			categoryId.setTextContent(value.getCategoryId());
 			offer.appendChild(categoryId);
+			for (String linksForPicture : value.getLinksForPicture()) {
+				Element picture = document.createElement("picture");
+				picture.setTextContent(linksForPicture);
+				offer.appendChild(picture);
+			}				
 			Element stock_quantity = document.createElement("stock_quantity");
 			String stockQuantity = Integer.toString(value.getStock_quantity());
 			stock_quantity.setTextContent(stockQuantity);
 			offer.appendChild(stock_quantity);
+			
+			Element vendor = document.createElement("vendor");
+			String vendorS = value.getVendor();
+			vendor.setTextContent(vendorS);
+			offer.appendChild(vendor);
+			
+			Element name = document.createElement("name");
+			String nameS = value.getName();
+			name.setTextContent(nameS);
+			offer.appendChild(name);
+			//TODO 
+			Element description = document.createElement("description");
+			String descriptionS = value.getDescription();
+			description.setTextContent(descriptionS);
+			offer.appendChild(description);
+			//add offers to root elements
 			root.appendChild(offer);
 		});
 		return document;
@@ -158,9 +184,21 @@ public class Client implements Callable<String> {
 		currencies.appendChild(currencie);
 		return document;
 	}
+	
+	private Optional<File> createTempFileForExcel (Path pathFoFile) {
+		File file = null;
+		try {
+			file = File.createTempFile(pathFoFile.toString(), ".tmp");
+			Files.copy(pathFoFile, Paths.get(file.getAbsolutePath()), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			log.severe("Tomething wrong with Excel file " + pathFoFile);
+			e.printStackTrace();
+		}
+		return Optional.of(file);
+	}
 
 	private void readExcelFile(Path pathFoFile) {
-		try (Workbook workbook = WorkbookFactory.create(pathFoFile.toFile())) {
+		try (Workbook workbook = WorkbookFactory.create(this.createTempFileForExcel(pathFoFile).get())) {
 			if (workbook == null) {
 				log.severe("Tomething wrong with WorkbookFactory " + pathFoFile);
 				return;
@@ -210,9 +248,9 @@ public class Client implements Callable<String> {
 	private void setOffers (Sheet sheet) {
 		offers = new TreeMap<Integer, Item>();
 		int countOfRows = getLastRowNum(sheet);
-		String[] pictures  = {"1231", "sccsdcsd"};
+//		String pic = sheet.getRow(1).getCell(7).getStringCellValue();
+//		String[] pictures  = sheet.getRow(1).getCell(7).getStringCellValue().split("\n");
 		String[] param  = {"black", "white"};
-//		int i = 1;
 		for (int i = 1; i<countOfRows;i++) {
 			Cell numberId = sheet.getRow(i).getCell(0);
 			int in = (int)numberId.getNumericCellValue();
@@ -224,12 +262,12 @@ public class Client implements Callable<String> {
 			.currencyId(sheet.getRow(i).getCell(6).toString())
 			.categoryId(sheet.getRow(i).getCell(1).toString())
 			//TODO
-			.linksForPicture(pictures)
+			.linksForPicture(sheet.getRow(i).getCell(7).getStringCellValue().split("\n"))
 			
 			.stock_quantity((int)sheet.getRow(i).getCell(1).getNumericCellValue())
-			.vendor(sheet.getRow(i).getCell(8).toString())
-			.name(sheet.getRow(i).getCell(9).toString())
-			.description(sheet.getRow(i).getCell(10).toString())
+			.vendor(sheet.getRow(i).getCell(8).getStringCellValue())
+			.name(sheet.getRow(i).getCell(9).getStringCellValue())
+			.description(sheet.getRow(i).getCell(10).getStringCellValue())
 			//TODO
 			.parameters(param)
 			.build();
@@ -250,7 +288,7 @@ public class Client implements Callable<String> {
 	
 	private void setcategoriesShop (Sheet sheet) {
 		categories = new TreeMap<Integer, String>();
-		int coumtOfRows = sheet.getPhysicalNumberOfRows();
+		int coumtOfRows = this.getLastRowNum(sheet);
 		for (int i=1; i<coumtOfRows;i++) {
 			String cou = sheet.getRow(i).getCell(0).toString();
 			Integer in = Integer.parseInt(cou.substring(0,cou.indexOf('.')));
