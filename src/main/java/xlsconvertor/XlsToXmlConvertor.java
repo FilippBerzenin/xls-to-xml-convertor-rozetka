@@ -95,7 +95,7 @@ public class XlsToXmlConvertor implements Callable<String> {
 			shop.appendChild(offers);
 			document = this.setOffersListFromXmlFile(document, offers);
 			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(new File(App.localDirectory + pathForXmlFile.getFileName()));
+			StreamResult result = new StreamResult(new File(JFrameForArgs.pathForExcelFile.getParent().toString()+"\\" + pathForXmlFile.getFileName()));
 			transformer.transform(source, result);
 			// Repalce some chars
 			// TODO //..

@@ -18,7 +18,7 @@ import lombok.extern.java.Log;
 @Log
 public class JFrameForArgs {
 
-	private Path pathForExcelFile;
+	public static Path pathForExcelFile;
 	private XlsToXmlConvertor convertor;
 
 	public void createGUI() {
@@ -26,12 +26,12 @@ public class JFrameForArgs {
 		f.setLocation(450, 250);
 		JLabel lab = new JLabel("Please, enter path for Excel");
 		lab.setBounds(10, 10, 300, 30);
-		JTextField pathToFile = new JTextField("C:\\workspace\\xlsconvertor\\src\\main\\resources\\rozetka.xlsx");
-		pathToFile.setBounds(10, 40, 230, 30);
+		JTextField pathToFile = new JTextField(App.localDirectory);
+		pathToFile.setBounds(10, 40, 450, 30);
 		JButton dir = new JButton("Select...");		
-		dir.setBounds(260, 40, 100, 30);
-		JButton b = new JButton("Submit");
-		b.setBounds(100, 180, 100, 40);
+		dir.setBounds(10, 80, 100, 30);
+		JButton b = new JButton("Transoform");
+		b.setBounds(190, 180, 100, 40);
 		JLabel label1 = new JLabel();
 		label1.setBounds(10, 110, 200, 100);
 		f.add(lab);
@@ -39,7 +39,7 @@ public class JFrameForArgs {
 		f.add(pathToFile);
 		f.add(dir);
 		f.add(b);
-		f.setSize(400, 300);
+		f.setSize(500, 300);
 		f.setLayout(null);
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,10 +50,11 @@ public class JFrameForArgs {
 				try {
 					pathForExcelFile = Paths.get(pathToFile.getText());
 					log.info(pathForExcelFile.toString());
-					f.dispose();
+//					f.dispose();
+					label1.setText("Args has been submitted.");
 					startClient(pathForExcelFile);
 					label1.setText("Args has been submitted.");
-				} catch (NumberFormatException e) {
+				} catch (RuntimeException e) {
 					label1.setText("Args have error values.");
 				}
 			}
