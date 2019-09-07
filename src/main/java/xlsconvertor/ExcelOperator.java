@@ -82,23 +82,35 @@ public class ExcelOperator {
 	
 	private void setPropertiesForElementsShop(Sheet sheet) {
 		shopProperties = new HashMap<String, String>();
-		shopProperties.put(sheet.getRow(0).getCell(0).toString(), sheet.getRow(1).getCell(0).toString());
-		shopProperties.put(sheet.getRow(0).getCell(1).toString(), sheet.getRow(1).getCell(1).toString());
-		shopProperties.put(sheet.getRow(0).getCell(2).toString(), sheet.getRow(1).getCell(2).toString());
-		shopProperties.put(sheet.getRow(0).getCell(3).toString(), sheet.getRow(1).getCell(3).toString());
+		shopProperties.put("name", sheet.getRow(1).getCell(this.findColumnFromName(sheet, "name")).toString());
+		shopProperties.put("company", sheet.getRow(1).getCell(this.findColumnFromName(sheet, "company")).toString());
+		shopProperties.put("url", sheet.getRow(1).getCell(this.findColumnFromName(sheet, "url")).toString());
+		shopProperties.put("currency", sheet.getRow(1).getCell(this.findColumnFromName(sheet, "currency")).toString());
 		JFrameForArgs.message = "Name: "+sheet.getRow(1).getCell(0).toString()+
 				" company: "+sheet.getRow(1).getCell(1).toString()+
 				" url: "+sheet.getRow(1).getCell(2).toString()+
 				" currency: "+sheet.getRow(1).getCell(3).toString()+"\n";
+	}
+	
+	private int findColumnFromName(Sheet sheet, String nameOfColumn) {
+		int start = sheet.getFirstRowNum();
+		for (Cell cell : sheet.getRow(start)) {
+			if (cell.getCellTypeEnum().equals(CellType.STRING) &&
+				cell.getStringCellValue().equals(nameOfColumn)) {
+				return cell.getColumnIndex();
+			}
+		}
+		JFrameForArgs.message ="Not found Column: "+nameOfColumn;
+		throw new RuntimeException();
 	}
 
 	private void setcategoriesShop(Sheet sheet) {
 		categories = new TreeMap<Integer, String>();
 		int coumtOfRows = this.getLastColumnNum(sheet, 1);
 		for (int i = 1; i < coumtOfRows; i++) {
-			String cou = sheet.getRow(i).getCell(0).toString();
+			String cou = sheet.getRow(i).getCell(this.findColumnFromName(sheet, "ID категоии")).toString();
 			Integer in = Integer.parseInt(cou.substring(0, cou.indexOf('.')));
-			categories.put(in, sheet.getRow(i).getCell(1).toString());
+			categories.put(in, sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Категория")).toString());
 		}
 	}
 	
@@ -109,30 +121,28 @@ public class ExcelOperator {
 		for (int i = 1; i < countOfRows; i++) {
 			Cell numberId = sheet.getRow(i).getCell(start);
 			Map<String, String >parameters = new HashMap<>();
-			for (int k = start+12; k < 30; k++) {
+			for (int k = this.findColumnFromName(sheet, "Артикул"); k < sheet.getRow(0).getLastCellNum(); k++) {
+				String rezult = this.getValueFromCell(sheet.getRow(i).getCell(k));
+				if (rezult.equals("error")) {
+					continue;
+				} else {
 				parameters.put(sheet.getRow(0).getCell(k).getStringCellValue(),
-						sheet.getRow(i).getCell(k).getStringCellValue());
+						this.getValueFromCell(sheet.getRow(i).getCell(k)));
+				}
 			}
 			int in = (int) numberId.getNumericCellValue();
-			
-//			this.findNumbersOfColumnfromName (sheet, "ID");
-			
 			Item item = Item.builder()
 					.ID(in)
-					.available(sheet.getRow(i).getCell(start+2).getStringCellValue())
-					.price_old(sheet.getRow(i).getCell(start+4).getCellTypeEnum().equals(CellType.STRING) ? 
-							sheet.getRow(i).getCell(start+4).getStringCellValue() :
-							this.getNuberValueFromCell(sheet.getRow(i).getCell(start+4).getNumericCellValue()))
-					.price(sheet.getRow(i).getCell(start+5).getCellTypeEnum().equals(CellType.STRING) ? 
-							sheet.getRow(i).getCell(start+5).getStringCellValue() :
-							this.getNuberValueFromCell(sheet.getRow(i).getCell(start+5).getNumericCellValue()))
-					.currencyId(sheet.getRow(i).getCell(6).getStringCellValue())
-					.categoryId(this.getNuberValueFromCell(sheet.getRow(i).getCell(start+1).getNumericCellValue()))
-					.linksForPicture(sheet.getRow(i).getCell(start+7).getStringCellValue().split("\n"))
-					.stock_quantity(this.getNuberValueFromCell(sheet.getRow(i).getCell(start+3).getNumericCellValue()))
-					.vendor(sheet.getRow(i).getCell(start+8).getStringCellValue())
-					.name(sheet.getRow(i).getCell(start+9).getStringCellValue())
-					.description(this.setVaildDescription(sheet.getRow(i).getCell(start+10).getStringCellValue()))
+					.available(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Наличие")).getStringCellValue())
+					.price_old(this.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Старая цена"))))
+					.price(this.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Новая цена"))))
+					.currencyId(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Валюта")).getStringCellValue())
+					.categoryId(this.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Категория товара"))))
+					.linksForPicture(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Фото товара")).getStringCellValue().split("\n"))
+					.stock_quantity(this.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Количество"))))
+					.vendor(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Бренд")).getStringCellValue())
+					.name(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Название товара")).getStringCellValue())
+					.description(this.setVaildDescription(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Описание")).getStringCellValue()))
 					.parameters(parameters).build();
 			offers.put(in, item);
 		}
@@ -156,15 +166,13 @@ public class ExcelOperator {
 		return rowCount;
 	}
 	
-	private String getNuberValueFromCell(Number num) {
+	private String getValueFromCell(Cell num) {
 		String value;
-		if (num instanceof Integer) {
-			int d = (int) num;
-			value = Integer.toString(d);
-			return value;
+		if (num.getCellTypeEnum().equals(CellType.STRING)) {
+			return num.getStringCellValue();
 		}
-		if (num instanceof Double) {
-			double d = (double) num;
+		if (num.getCellTypeEnum().equals(CellType.NUMERIC)) {
+			double d = (double) num.getNumericCellValue();
 			value = Double.toString(d);
 			String s = value.substring(value.indexOf(".") + 1);
 			int h = Integer.parseInt(s);

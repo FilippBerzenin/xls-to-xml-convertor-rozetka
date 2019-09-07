@@ -58,6 +58,7 @@ public class JFrameForArgs {
 					label1.setText("Args has been submitted.");
 					JOptionPane.showMessageDialog (null, message, "Message", JOptionPane.INFORMATION_MESSAGE);
 				} catch (RuntimeException e) {
+					JOptionPane.showMessageDialog (null, message, "Message", JOptionPane.INFORMATION_MESSAGE);
 					label1.setText("Args have error values.");
 				}
 			}
