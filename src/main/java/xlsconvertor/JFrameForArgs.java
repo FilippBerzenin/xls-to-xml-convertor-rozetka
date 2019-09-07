@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -20,6 +21,7 @@ public class JFrameForArgs {
 
 	public static Path pathForExcelFile;
 	private XlsToXmlConvertor convertor;
+	public static String message;
 
 	public void createGUI() {
 		JFrame f = new JFrame("XLS to XML (Rozetka) konvertor");
@@ -54,6 +56,7 @@ public class JFrameForArgs {
 					label1.setText("Args has been submitted.");
 					startClient(pathForExcelFile);
 					label1.setText("Args has been submitted.");
+					JOptionPane.showMessageDialog (null, message, "Message", JOptionPane.INFORMATION_MESSAGE);
 				} catch (RuntimeException e) {
 					label1.setText("Args have error values.");
 				}

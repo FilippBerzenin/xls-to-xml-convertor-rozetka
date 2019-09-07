@@ -34,6 +34,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -50,7 +51,7 @@ public class XlsToXmlConvertor implements Callable<String> {
 	private Map<String, String> shopProperties;
 	private Map<Integer, String> categories;
 	private Map<Integer, Item> offers;
-//	private Map<String, String> parametrs;
+	private int startColumn = 8;
 
 	public XlsToXmlConvertor(Path pathFoFile) {
 		this.pathFoFile = pathFoFile;
@@ -131,6 +132,8 @@ public class XlsToXmlConvertor implements Callable<String> {
 			}
 		}
 	}
+	
+	private int counterOfOffers;
 
 	private Document setOffersListFromXmlFile(Document document, Element root) {
 		offers.forEach((key, value) -> {
@@ -189,9 +192,13 @@ public class XlsToXmlConvertor implements Callable<String> {
 			});
 			// add offers to root elements
 			root.appendChild(offer);
+			counterOfOffers++;
 		});
+		JFrameForArgs.message =JFrameForArgs.message+ "Add : "+counterOfOffers+ " offers"+"\n";
 		return document;
 	}
+	
+	private int counterOfCategores;
 
 	private Document setCategoryListFromXmlFile(Document document, Element root) {
 		categories.forEach((key, value) -> {
@@ -199,7 +206,9 @@ public class XlsToXmlConvertor implements Callable<String> {
 			category.setAttribute("id", key.toString());
 			category.setTextContent(value);
 			root.appendChild(category);
+			counterOfCategores++;
 		});
+		JFrameForArgs.message =JFrameForArgs.message+ "Add : "+counterOfCategores+ " categores"+"\n";
 		return document;
 	}
 
@@ -268,13 +277,13 @@ public class XlsToXmlConvertor implements Callable<String> {
 			e.printStackTrace();
 		}
 	}
-
-	public int getLastRowNum(Sheet sheet) {
+	
+	public int getLastColumnNum(Sheet sheet, int numberOfColumn) {
 		int rowCount = 0;
 		Iterator<Row> rows = sheet.iterator();
 		while (rows.hasNext()) {
 			try {
-				Optional<String> r = Optional.of(rows.next().getCell(0).toString());
+				Optional<String> r = Optional.of(rows.next().getCell(numberOfColumn).toString());
 				if (r.get().isEmpty()) {
 					break;
 				}
@@ -288,42 +297,56 @@ public class XlsToXmlConvertor implements Callable<String> {
 
 	private void setOffers(Sheet sheet) {
 		offers = new TreeMap<Integer, Item>();
-		int countOfRows = getLastRowNum(sheet);
+		int countOfRows = getLastColumnNum(sheet, startColumn);
+		int start = 8;
 		for (int i = 1; i < countOfRows; i++) {
-			Cell numberId = sheet.getRow(i).getCell(0);
+			Cell numberId = sheet.getRow(i).getCell(start);
 			Map<String, String >parameters = new HashMap<>();
-			for (int k = 11; k < 30; k++) {
+			for (int k = start+12; k < 30; k++) {
 				parameters.put(sheet.getRow(0).getCell(k).getStringCellValue(),
 						sheet.getRow(i).getCell(k).getStringCellValue());
 			}
 			int in = (int) numberId.getNumericCellValue();
+			
+//			this.findNumbersOfColumnfromName (sheet, "ID");
+			
 			Item item = Item.builder()
 					.ID(in)
-					.available(sheet.getRow(i).getCell(2).getStringCellValue())
-					.price_old(this.getNuberValueFromCell(sheet.getRow(i).getCell(4).getNumericCellValue()))
-					.price(this.getNuberValueFromCell(sheet.getRow(i).getCell(5).getNumericCellValue()))
+					.available(sheet.getRow(i).getCell(start+2).getStringCellValue())
+					.price_old(sheet.getRow(i).getCell(start+4).getCellTypeEnum().equals(CellType.STRING) ? 
+							sheet.getRow(i).getCell(start+4).getStringCellValue() :
+							this.getNuberValueFromCell(sheet.getRow(i).getCell(start+4).getNumericCellValue()))
+					.price(sheet.getRow(i).getCell(start+5).getCellTypeEnum().equals(CellType.STRING) ? 
+							sheet.getRow(i).getCell(start+5).getStringCellValue() :
+							this.getNuberValueFromCell(sheet.getRow(i).getCell(start+5).getNumericCellValue()))
 					.currencyId(sheet.getRow(i).getCell(6).getStringCellValue())
-					.categoryId(this.getNuberValueFromCell(sheet.getRow(i).getCell(1).getNumericCellValue()))
-					.linksForPicture(sheet.getRow(i).getCell(7).getStringCellValue().split("\n"))
-					.stock_quantity(this.getNuberValueFromCell(sheet.getRow(i).getCell(3).getNumericCellValue()))
-					.vendor(sheet.getRow(i).getCell(8).getStringCellValue())
-					.name(sheet.getRow(i).getCell(9).getStringCellValue())
-					.description(this.setVaildDescription(sheet.getRow(i).getCell(10).getStringCellValue()))
+					.categoryId(this.getNuberValueFromCell(sheet.getRow(i).getCell(start+1).getNumericCellValue()))
+					.linksForPicture(sheet.getRow(i).getCell(start+7).getStringCellValue().split("\n"))
+					.stock_quantity(this.getNuberValueFromCell(sheet.getRow(i).getCell(start+3).getNumericCellValue()))
+					.vendor(sheet.getRow(i).getCell(start+8).getStringCellValue())
+					.name(sheet.getRow(i).getCell(start+9).getStringCellValue())
+					.description(this.setVaildDescription(sheet.getRow(i).getCell(start+10).getStringCellValue()))
 					.parameters(parameters).build();
 			offers.put(in, item);
 		}
 		System.out.println("ok");
 	}
+	
+	private int findNumbersOfColumnfromName (Sheet sheet, String name) {
+		log.info(sheet.getColumnBreaks().toString());
+//		log.info(sheet.getColumnOutlineLevel(2));
+		return 0;
+	}
 
 	private String setVaildDescription(String discription) {
-		String preffix = "<![CDATA[<p>";
-		String lineSplit = "</p><p>•";
-		String end = "</p>]]";
+//		String preffix = "<![CDATA[<p>";
+//		String lineSplit = "</p><p>•";
+//		String end = "</p>]]";
 		discription = discription.replaceAll("</p>", "");
 		discription = discription.replaceAll("\n", "");
-		String newDiscription = preffix + discription.replace("•", lineSplit);
-		newDiscription = newDiscription + end;
-		return newDiscription;
+//		String newDiscription = preffix + discription.replace("•", lineSplit);
+//		newDiscription = newDiscription + end;
+		return discription;
 	}
 
 	private String getNuberValueFromCell(Number num) {
@@ -354,11 +377,15 @@ public class XlsToXmlConvertor implements Callable<String> {
 		shopProperties.put(sheet.getRow(0).getCell(1).toString(), sheet.getRow(1).getCell(1).toString());
 		shopProperties.put(sheet.getRow(0).getCell(2).toString(), sheet.getRow(1).getCell(2).toString());
 		shopProperties.put(sheet.getRow(0).getCell(3).toString(), sheet.getRow(1).getCell(3).toString());
+		JFrameForArgs.message = "Name: "+sheet.getRow(1).getCell(0).toString()+
+				" company: "+sheet.getRow(1).getCell(1).toString()+
+				" url: "+sheet.getRow(1).getCell(2).toString()+
+				" currency: "+sheet.getRow(1).getCell(3).toString()+"\n";
 	}
 
 	private void setcategoriesShop(Sheet sheet) {
 		categories = new TreeMap<Integer, String>();
-		int coumtOfRows = this.getLastRowNum(sheet);
+		int coumtOfRows = this.getLastColumnNum(sheet, 1);
 		for (int i = 1; i < coumtOfRows; i++) {
 			String cou = sheet.getRow(i).getCell(0).toString();
 			Integer in = Integer.parseInt(cou.substring(0, cou.indexOf('.')));
