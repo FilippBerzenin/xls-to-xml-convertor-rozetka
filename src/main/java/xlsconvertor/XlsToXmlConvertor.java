@@ -53,7 +53,7 @@ public class XlsToXmlConvertor implements Callable<String> {
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "8");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "shops.dtd");
@@ -88,6 +88,8 @@ public class XlsToXmlConvertor implements Callable<String> {
 		}
 	}
 
+//	TODO
+//	Not good method
 	private void replaceSpecificContentFromFile(String filePath, String oldString, String newString) {
 		File fileToBeModified = new File(filePath);
 		String oldContent = "";
@@ -117,8 +119,8 @@ public class XlsToXmlConvertor implements Callable<String> {
 	private Document setOffersListFromXmlFile(Document document, Element root) {
 		ExcelOperator.getOffers().forEach((key, value) -> {
 			Element offer = document.createElement("offer");
-			String avaiable = value.getAvailable().equals("Есть") ? "true" : "false";
-			offer.setAttribute("avilable", avaiable);
+			String available = value.getAvailable().equals("Есть") ? "true" : "false";
+			offer.setAttribute("available", available);
 			offer.setAttribute("id", key.toString());
 
 			Element price_old = document.createElement("price_old");
@@ -206,11 +208,11 @@ public class XlsToXmlConvertor implements Callable<String> {
 		root.appendChild(url);
 		Element currencies = document.createElement("currencies");
 		root.appendChild(currencies);
-		Element currencie = document.createElement("currencie");
+		Element currency = document.createElement("currency");
 		String nameOfCurrencie = shopProperties.get("currency");
-		currencie.setAttribute("id", nameOfCurrencie);
-		currencie.setAttribute("rate", "1");
-		currencies.appendChild(currencie);
+		currency.setAttribute("id", nameOfCurrencie);
+		currency.setAttribute("rate", "1");
+		currencies.appendChild(currency);
 		return document;
 	}
 

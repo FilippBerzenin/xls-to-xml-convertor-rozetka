@@ -1,7 +1,5 @@
 package xlsconvertor;
 
-import java.awt.Color;
-import java.awt.Font;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,17 +9,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -31,9 +25,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import lombok.Getter;
 import lombok.extern.java.Log;
@@ -168,7 +159,7 @@ public class ExcelOperator {
 
 	private void setCategoriesShop(Sheet sheet) {
 		categories = new TreeMap<Integer, String>();
-		int coumtOfRows = this.getLastColumnNum(sheet, 1);
+		int coumtOfRows = this.getLastColumnNum(sheet, this.findColumnFromName(sheet, "ID категоии"));
 		for (int i = 1; i < coumtOfRows; i++) {
 			String cou = sheet.getRow(i).getCell(this.findColumnFromName(sheet, "ID категоии")).toString();
 			Integer in = Integer.parseInt(cou.substring(0, cou.indexOf('.')));
@@ -177,13 +168,14 @@ public class ExcelOperator {
 	}
 
 	private void setOffers(Sheet sheet) {
+		try {
 		offers = new TreeMap<Integer, Item>();
-		int countOfRows = getLastColumnNum(sheet, startColumn);
+		int countOfRows = getLastColumnNum(sheet, this.findColumnFromName(sheet, "Категория товара"));
 		int start = 8;
 		for (int i = 1; i < countOfRows; i++) {
 			Cell numberId = sheet.getRow(i).getCell(start);
 			Map<String, String> parameters = new HashMap<>();
-			for (int k = this.findColumnFromName(sheet, "Артикул"); k < sheet.getRow(0).getLastCellNum(); k++) {
+			for (int k = this.findColumnFromName(sheet, "Вид"); k < sheet.getRow(0).getLastCellNum(); k++) {
 				String rezult = this.getValueFromCell(sheet.getRow(i).getCell(k));
 				if (rezult.equals("error")) {
 					continue;
@@ -213,6 +205,9 @@ public class ExcelOperator {
 					.parameters(parameters).build();
 			offers.put(in, item);
 		}
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
 		System.out.println("ok");
 	}
 
@@ -234,6 +229,10 @@ public class ExcelOperator {
 	}
 
 	private String getValueFromCell(Cell num) {
+		if (num == null) {
+			return "error";
+		}
+		try {
 		String value;
 		if (num.getCellTypeEnum().equals(CellType.STRING)) {
 			return num.getStringCellValue();
@@ -250,18 +249,21 @@ public class ExcelOperator {
 				return f;
 			}
 		}
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
 		return "error";
 	}
 
 	private String setVaildDescription(String discription) {
-//		String preffix = "<![CDATA[<p>";
+		String preffix = "<![CDATA[";
 //		String lineSplit = "</p><p>•";
-//		String end = "</p>]]";
-		discription = discription.replaceAll("</p>", "");
-		discription = discription.replaceAll("\n", "");
+		String end = "]]";
+//		discription = discription.replaceAll("</p>", "");
+//		discription = discription.replaceAll("\n", "");
 //		String newDiscription = preffix + discription.replace("•", lineSplit);
-//		newDiscription = newDiscription + end;
-		return discription;
+		String newDiscription = preffix + discription + end;
+		return newDiscription;
 	}
 
 }
