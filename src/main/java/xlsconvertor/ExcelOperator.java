@@ -258,7 +258,7 @@ public class ExcelOperator {
 	private String setVaildDescription(String discription) {
 		String preffix = "<![CDATA[";
 //		String lineSplit = "</p><p>•";
-		String end = "]]";
+		String end = "]]>";
 //		discription = discription.replaceAll("</p>", "");
 //		discription = discription.replaceAll("\n", "");
 //		String newDiscription = preffix + discription.replace("•", lineSplit);
