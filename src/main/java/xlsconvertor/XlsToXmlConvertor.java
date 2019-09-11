@@ -75,12 +75,12 @@ public class XlsToXmlConvertor implements Callable<String> {
 			shop.appendChild(offers);
 			document = this.setOffersListFromXmlFile(document, offers);
 			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(new File(JFrameForArgs.pathForExcelFile.getParent().toString()+"\\" + pathForXmlFile.getFileName()));
+			StreamResult result = new StreamResult(new File(JFrameForArgs.pathForWorkingFile.getParent().toString()+"\\" + pathForXmlFile.getFileName()));
 			transformer.transform(source, result);
 			// Repalce some chars
 			// TODO //..
-			this.replaceSpecificContentFromFile((App.localDirectory + pathForXmlFile.getFileName()), "&lt;", "<");
-			this.replaceSpecificContentFromFile((App.localDirectory + pathForXmlFile.getFileName()), "&gt;", ">");
+//			this.replaceSpecificContentFromFile((App.localDirectory + pathForXmlFile.getFileName()), "&lt;", "<");
+//			this.replaceSpecificContentFromFile((App.localDirectory + pathForXmlFile.getFileName()), "&gt;", ">");
 			System.out.println("Дokymeнт coхpaнeн!");
 
 		} catch (TransformerException | TransformerFactoryConfigurationError | ParserConfigurationException e) {

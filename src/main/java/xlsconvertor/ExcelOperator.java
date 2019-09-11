@@ -8,24 +8,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.SystemOutLogger;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.extern.java.Log;
 
@@ -38,7 +48,7 @@ public class ExcelOperator {
 	public static Map<Integer, String> categories;
 	@Getter
 	public static Map<Integer, Item> offers;
-	private int startColumn = 8;
+//	private int startColumn = 8;
 
 	public boolean equalsTwoExcelFiles(Path firstPathFoFile, Path secondPathFoFile) {
 		try (Workbook workbookFirst = WorkbookFactory.create(this.createTempFileForExcel(firstPathFoFile).get());
@@ -47,40 +57,56 @@ public class ExcelOperator {
 				log.severe("Tomething wrong with WorkbookFactory " + firstPathFoFile + " " + secondPathFoFile);
 				return false;
 			}
-			int artikulNumberForWorkbookFirst = this.findColumnFromName(workbookFirst.getSheet("price"), "Артикул");
-			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookFirst);
-			int artikulNumberForWorkbookSecond = this.findColumnFromName(workbookSecond.getSheet("price"), "Артикул");
-			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookSecond);
-			int countDifferentRow = 0;
-			for (int i = 1; i < workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookFirst)
-					.getLastCellNum(); i++) {
-				Cell cell1 = workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst);
-				Cell cell2 = workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond);
-				String s1 = cell1.getStringCellValue();
-				String s2 = cell2.getStringCellValue();
-
-				CellStyle styleForEquals = workbookSecond.createCellStyle();
-				styleForEquals.setFillBackgroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-				styleForEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG);
-
-				CellStyle styleForNoEquals = workbookSecond.createCellStyle();
-				styleForNoEquals.setFillBackgroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
-				styleForNoEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG); // LEAST_DOTS
-
-				if (s1.isEmpty() && s2.isEmpty()) {
-					break;
-				}
-				if (s1.equals(s2)) {
-					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
-							.setCellStyle(styleForEquals);
-				} else {
-					countDifferentRow++;
-					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
-							.setCellStyle(styleForNoEquals);
-					JFrameForArgs.message = countDifferentRow + " positions in the file are tinted - "
-							+ secondPathFoFile;
-				}
-			}
+			Set<Row> firstExcelRowsFromSheet  = getRowsFromSheet (workbookFirst.getSheet("price")).get();
+			Set<Row> secondExcelRowsFromSheet  = getRowsFromSheet (workbookSecond.getSheet("price")).get();
+			Row firstRow = this.setFirstRowForGeneralSheet (workbookFirst.getSheet("price").getRow(0), workbookSecond.getSheet("price").getRow(0)).get();
+			
+			
+			
+			//			int artikulNumberForWorkbookFirst = this.findColumnFromName(workbookFirst.getSheet("price"), "Артикул");
+////			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookFirst);
+//			int artikulNumberForWorkbookSecond = this.findColumnFromName(workbookSecond.getSheet("price"), "Артикул");
+////			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookSecond);
+//			int countDifferentRow = 0;
+//			int v=  workbookFirst.getSheet("price")
+//					.getColumnOutlineLevel(artikulNumberForWorkbookFirst)
+//					;
+//			int i = 1;
+////			boolean flag = true;
+//			while (true) {
+//				if (workbookFirst.getSheet("price").getRow(i) == null ||
+//					workbookSecond.getSheet("price").getRow(i) == null ||
+//					workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst) == null || 
+//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond) == null ||
+//					workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst) == null || 
+//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond) == null) {
+//					break;
+//				}
+//				Cell cell1 = workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst);
+//				Cell cell2 = workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond);
+//				String s1 = cell1.getStringCellValue();
+//				String s2 = cell2.getStringCellValue();
+//				i++;
+//
+//				CellStyle styleForEquals = workbookSecond.createCellStyle();
+//				styleForEquals.setFillBackgroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+//				styleForEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG);
+//
+//				CellStyle styleForNoEquals = workbookSecond.createCellStyle();
+//				styleForNoEquals.setFillBackgroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+//				styleForNoEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG); // LEAST_DOTS
+//
+//				if (s1.equals(s2)) {
+//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
+//							.setCellStyle(styleForEquals);
+//				} else {
+//					countDifferentRow++;
+//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
+//							.setCellStyle(styleForNoEquals);
+//					JFrameForArgs.message = countDifferentRow + " positions in the file are tinted - "
+//							+ secondPathFoFile;
+//				}
+//			}
 			try (OutputStream fileOut = new FileOutputStream(secondPathFoFile.toFile())) {
 				workbookSecond.write(fileOut);
 			}
@@ -91,7 +117,101 @@ public class ExcelOperator {
 			return false;
 		}
 	}
+	
+	private Optional<Row> setFirstRowForGeneralSheet (Row first, Row second) {
+		List<СolumnName> rezult;
+		List<СolumnName> stringsFromFirstRow = getListOfStringFromRow(first).get();
+		List<СolumnName> stringsFromSecondRow = getListOfStringFromRow(second).get();
+		if (Collections.disjoint(stringsFromFirstRow, stringsFromSecondRow)) {
+			return Optional.of(first);
+		}
+		else {	
+		rezult = new ArrayList<> (
+				Stream.of(stringsFromFirstRow, stringsFromSecondRow)
+				.flatMap(List::stream)
+				.collect(Collectors.toMap(СolumnName::getName,
+						name -> name,
+						(СolumnName x, СolumnName y) -> x == null ? y : x))
+				.values());		
+		rezult.stream().sorted().forEach(System.out::println);
+		
+		return Optional.of(first);
+	}
+	}
+	
+//	private List<СolumnName> sortedAndGiveRealIndexForCollection (List<СolumnName> collection) {
+//		collection = collection
+//				  .stream()
+//				  .filter(e -> !e.equals(e))
+//				  .collect(Collectors.toList());
+//		
+//		collection.stream().forEach(element -> {
+//			collection.forEach(find -> {
+//				int numberOfEquals = 0;
+//				if (find.getColumn()==element.getColumn()) {
+//					numberOfEquals++;
+//				}
+//				if (find.getColumn()==element.getColumn()) {
+//					numberOfEquals++;
+//				}
+//				if (numberOfEquals==2) {
+//					int max = collection.stream()
+//							.max(Comparator
+//							.comparingInt(СolumnName::getColumn))
+//							.get()
+//							.getColumn()+1;
+//					element.setColumn(max);
+//				}
+//						
+//			});
+//		});
+//		for (int i = 0; i<collection.size();i++) {
+//			System.out.println(collection.get(i).toString());
+//		}
+//		return collection;
+//	}
+	
+	@Data
+	class СolumnName implements Comparable<СolumnName> {
+		private String name;
+		private int column;		
 
+		public СolumnName(int column, String name) {
+			this.name = name;
+			this.column = column;
+		}
+
+		@Override
+		public int compareTo(СolumnName o) {
+			return (this.column - o.column);
+		}	
+	}
+	
+	private Optional<List<СolumnName>> getListOfStringFromRow(Row row) {
+		List<СolumnName> stringValues = new ArrayList<>(); 
+		row.forEach(r -> {
+			stringValues.add(new СolumnName(r.getColumnIndex(), r.toString()));
+		});
+		return Optional.of(stringValues);
+	}
+	
+	private int getNumberOfCells(Row row) {
+		return row.getPhysicalNumberOfCells();
+	}
+	
+	private Optional<Set<Row>> getRowsFromSheet (Sheet sheet) {
+		Set<Row> rows = new HashSet<>();
+		int indexOfColumn = findColumnFromName(sheet, "Наличие");
+		System.out.println(getLastColumnNum(sheet, indexOfColumn));
+		sheet.forEach(row -> {
+		if (row != null && row.getCell(indexOfColumn) != null && !row.getCell(indexOfColumn).getStringCellValue().isEmpty() && 
+				!row.getCell(indexOfColumn).getStringCellValue().equals("Наличие")) {
+			rows.add(row);
+			}
+		});
+		return Optional.of(rows);
+	}
+	
 	public void readExcelFile(Path pathFoFile) {
 		try (Workbook workbook = WorkbookFactory.create(this.createTempFileForExcel(pathFoFile).get())) {
 			if (workbook == null) {
@@ -256,14 +376,16 @@ public class ExcelOperator {
 	}
 
 	private String setVaildDescription(String discription) {
-		String preffix = "<![CDATA[";
+		String preffix = "<![CDATA[<p>";
 //		String lineSplit = "</p><p>•";
-		String end = "]]>";
+		String end = "</p>";
 //		discription = discription.replaceAll("</p>", "");
 //		discription = discription.replaceAll("\n", "");
 //		String newDiscription = preffix + discription.replace("•", lineSplit);
-		String newDiscription = preffix + discription + end;
+		String newDiscription = preffix + discription+end;
 		return newDiscription;
 	}
 
 }
+
+
