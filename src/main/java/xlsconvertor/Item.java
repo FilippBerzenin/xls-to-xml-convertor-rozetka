@@ -2,11 +2,9 @@ package xlsconvertor;
 
 import java.util.Map;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
 public class Item {
 	
 	private int ID;
@@ -32,5 +30,9 @@ public class Item {
 	private String description;
 	
 	private Map<String, String> parameters;
+	
+	Item () {
+		
+	}
 
 }

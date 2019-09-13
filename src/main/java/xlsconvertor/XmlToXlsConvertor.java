@@ -6,10 +6,12 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -161,7 +163,7 @@ public class XmlToXlsConvertor implements Callable<Boolean> {
 			this.setAllParametersOnTopRow (workbook.getSheet("price"), document);
 			this.enterValuesSheetNameShop(workbook.getSheet("name shop"), document);
 			this.enterValuesSheetCategories(workbook.getSheet("categories"), document);
-			this.enterValuesSheetPrice(workbook.getSheet("price"), document);
+			this.collectionsValuesForPriceSheetFromXml(workbook.getSheet("price"), document);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			e.printStackTrace();
 			e.getLocalizedMessage();
@@ -218,11 +220,169 @@ public class XmlToXlsConvertor implements Callable<Boolean> {
 		}
 	}
 	
-	private void enterValuesSheetPrice (Sheet sheet, Document document) {
+	private void setValuesIntoPriceSheet(List<Item> items, Sheet sheet) {
+		for (int i = 0; i < items.size(); i++) {
+			Row rowOnTop = sheet.getRow(0);
+			Row row = sheet.createRow(i + 1);
+//			System.out.println(rowOnTop.getLastCellNum());
+			for (int k = 0; k < rowOnTop.getLastCellNum(); k++) {
+				switch (rowOnTop.getCell(k).getStringCellValue()) {
+				case ("ID"): {
+					Cell cell = row.createCell(k, CellType.NUMERIC);
+					cell.setCellValue(items.get(i).getID());
+					break;
+				}
+				case ("Категория товара"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getCategoryId());
+					break;
+				}
+				case ("Наличие"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getAvailable());
+					break;
+				}
+				case ("Количество"): {
+					Cell cell = row.createCell(k, CellType.NUMERIC);
+					cell.setCellValue(Integer.parseInt(items.get(i).getStock_quantity()));
+					break;
+				}
+				case ("Старая цена"): {
+					Cell cell = row.createCell(k, CellType.NUMERIC);
+					cell.setCellValue(Integer.parseInt(items.get(i).getPrice_old()));
+					break;
+				}
+				case ("Новая цена"): {
+					Cell cell = row.createCell(k, CellType.NUMERIC);
+					cell.setCellValue(Integer.parseInt(items.get(i).getPrice()));
+					break;
+				}
+				case ("Валюта"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getCurrencyId());
+					break;
+				}
+				case ("Фото товара"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					int size = items.get(i).getLinksForPicture().length;
+					String links = "";
+					for (int j = 0;j<size; j++) {
+						if (j == size-1) {
+							links = links+items.get(i).getLinksForPicture()[j];
+						}
+						else links = links+items.get(i).getLinksForPicture()[j]+"\n";
+					}
+					cell.setCellValue(links);
+					break;
+				}
+				case ("Бренд"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getVendor());
+					break;
+				}
+				case ("Название товара"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getName());
+					break;
+				}
+				case ("Описание"): {
+					Cell cell = row.createCell(k, CellType.STRING);
+					cell.setCellValue(items.get(i).getDescription());
+					break;
+				}
+				}
+				int iterator = k;
+				items.get(i).getParameters().forEach((key, value) -> {
+					for (int g = 0;g<rowOnTop.getLastCellNum();g++) {
+						if (rowOnTop.getCell(g).getStringCellValue().equals(key)) {
+							Cell cell = row.createCell(g, CellType.STRING);
+							cell.setCellValue(value);
+						}
+					}
+				});
+			}
+		}
+	}
+	
+	private void collectionsValuesForPriceSheetFromXml (Sheet sheet, Document document) {
+		try {
+		List<Item> items = new LinkedList<>();
 		NodeList categoriesElements = document.getElementsByTagName("offer");
-		System.out.println(categoriesElements.getLength());
-		
-		//		Row row = sheet.getRow(rownum)
+		System.out.println(categoriesElements.getLength());		
+		for (int i = 0;i<categoriesElements.getLength();i++) {
+			Item item = new Item();
+			List<String> linksforPicture =  new LinkedList<>();
+//			List<String> parameters =  new LinkedList<>();
+			item.setParameters(new HashMap<>());
+			NodeList elementsFromOffer = categoriesElements.item(i).getChildNodes();
+			for (int k = 0; k<elementsFromOffer.getLength();k++) {
+				System.out.println(elementsFromOffer.item(k).getNodeName());
+				switch (elementsFromOffer.item(k).getNodeName()) {
+					case "price_old": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setPrice_old(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "price": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setPrice(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "currencyId": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setCurrencyId(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "categoryId": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setCategoryId(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "picture": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						linksforPicture.add(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "stock_quantity": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setStock_quantity(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "vendor": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setVendor(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "name": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setName(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "description": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						item.setDescription(elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+					case "param": {
+						System.out.println(elementsFromOffer.item(k).getNodeName()+" "+elementsFromOffer.item(k).getTextContent());
+						System.out.println(elementsFromOffer.item(k).getAttributes().getNamedItem("name").getNodeValue());
+						
+						item.getParameters().put(
+								elementsFromOffer.item(k).getAttributes().getNamedItem("name").getNodeValue(), 
+								elementsFromOffer.item(k).getTextContent());
+						break;
+					}
+				}
+			}
+				item.setID(Integer.parseInt(categoriesElements.item(i).getAttributes().getNamedItem("id").getNodeValue()));
+				item.setAvailable(categoriesElements.item(i).getAttributes().getNamedItem("available").getNodeValue().equals("true") ? "Есть" : "Нет");
+				item.setLinksForPicture(linksforPicture.toArray(new String[linksforPicture.size()]));
+				items.add(item);	
+			} 
+		this.setValuesIntoPriceSheet (items,sheet);
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
