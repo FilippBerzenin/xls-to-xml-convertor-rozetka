@@ -7,17 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -27,7 +22,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import lombok.extern.java.Log;
 
@@ -151,24 +145,15 @@ public class XmlToXlsConvertor implements Callable<Boolean> {
 	
 	private void parseXmlFile(Path pathForFile) {
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setValidating(false);
-			factory.setNamespaceAware(true);
-			factory.setFeature("http://xml.org/sax/features/namespaces", false);
-			factory.setFeature("http://xml.org/sax/features/validation", false);
-			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(pathForFile.toUri().toString());
+			Document document = ExcelUtils.getXmlDocument(pathForFile).get();
 			this.setAllParametersOnTopRow (workbook.getSheet("price"), document);
 			this.enterValuesSheetNameShop(workbook.getSheet("name shop"), document);
 			this.enterValuesSheetCategories(workbook.getSheet("categories"), document);
 			this.collectionsValuesForPriceSheetFromXml(workbook.getSheet("price"), document);
-		} catch (SAXException | IOException | ParserConfigurationException e) {
+		} catch (RuntimeException e) {
 			e.printStackTrace();
 			e.getLocalizedMessage();
 			JFrameForArgs.message = "Thomething wrong! Section parse xml file " + e.getLocalizedMessage();
-
 		}
 	}
 	private int k = 0;

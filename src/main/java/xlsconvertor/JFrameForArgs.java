@@ -12,7 +12,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import lombok.extern.java.Log;
@@ -28,8 +32,11 @@ public class JFrameForArgs {
 	private String localMessage;
 
 	public void createGUI() {
+		int vertical = 450;
+		int horizon = 250;
+		
 		JFrame f = new JFrame("XLS to XML (Rozetka) konvertor");
-		f.setLocation(450, 250);
+		f.setLocation(vertical, horizon);
 		JLabel lab = new JLabel("Please, enter path for Excel");
 		lab.setBounds(10, 10, 300, 30);
 		
@@ -46,10 +53,26 @@ public class JFrameForArgs {
 		JButton xmlToXls = new JButton("XML to XLS");		
 		xmlToXls.setBounds(140,80, 120, 30);
 		
+		JButton changeThePrice = new JButton("Change the price");		
+		changeThePrice.setBounds(270,80, 150, 30);
+		
+		JButton newPrice = new JButton("Change the price");		
+		newPrice.setBounds(270,80, 150, 30);
+		
+		JTextField columnNameButton = new JTextField("price");
+		columnNameButton.setBounds(10, 80, 150, 30);
+
+		JTextField jspinner = new JTextField("+50");
+		jspinner.setHorizontalAlignment(SwingConstants.RIGHT);
+		jspinner.setBounds(10, 120, 150, 30);
+		JLabel jspinnerlab = new JLabel("%, Enter the percentage with a sign (+/-), example +50");
+		jspinnerlab.setBounds(165, 120, 330, 30);
+		
 		JButton transform = new JButton("Transform");
-		transform.setBounds(190, 180, 100, 40);
+		transform.setBounds(130, 130, 150, 40);
+		
 		JLabel label1 = new JLabel();
-		label1.setBounds(10, 110, 200, 100);
+		label1.setBounds(10, 180, 200, 100);
 		
 		JButton dir2 = new JButton("Select...");		
 		dir2.setBounds(375,80, 100, 30);
@@ -60,11 +83,62 @@ public class JFrameForArgs {
 		f.add(dir);
 		f.add(equalsSelect);
 		f.add(xmlToXls);
+		f.add(changeThePrice);
 		f.add(transform);
 		f.setSize(500, 300);
 		f.setLayout(null);
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		newPrice.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					pathForWorkingFile = Paths.get(pathToFile.getText());
+					if(Files.exists(pathForWorkingFile) && 
+						checkIfXmlFiles(pathForWorkingFile)) {
+						changePrice(pathForWorkingFile, columnNameButton.getText(), jspinner.getText());
+						log.info(columnNameButton.getText());
+						log.info(jspinner.getText());
+					} else {
+						label1.setText("Args have error values.");
+					}
+				} catch (RuntimeException ex) {
+					label1.setText("Args have error values.");
+				}
+				
+			}
+			
+		});
+		
+		changeThePrice.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					pathForWorkingFile = Paths.get(pathToFile.getText());
+					if(checkIfXmlFiles(pathForWorkingFile)) {
+						log.info(pathForWorkingFile.toString());
+						log.info(columnNameButton.getText());
+						log.info(jspinner.getText());
+						f.add(columnNameButton);
+						f.add(jspinner);
+						f.add(newPrice);
+						f.add(jspinnerlab);
+						f.remove(xmlToXls);
+						f.remove(equalsSelect);
+						f.remove(changeThePrice);
+						f.remove(transform);
+						f.repaint();
+					} else {
+						label1.setText("Args have error values.");
+					}
+				} catch (RuntimeException ex) {
+					label1.setText("Args have error values.");
+				}
+				
+			}
+			
+		});
 		
 		xmlToXls.addActionListener(new ActionListener() {
 
@@ -139,14 +213,28 @@ public class JFrameForArgs {
 				equalsSelect.setEnabled(false);
 				f.add(pathToFileForEquals);
 				f.add(dir2);
-				//TODO
-				equalsSelect.disable();
+				f.remove(changeThePrice);
+				f.remove(equalsSelect);
 				xmlToXls.setEnabled(false);
 				equalsSelect.setEnabled(false);
 				selectEqaulsMode = true;
 				f.repaint();
 			}
 		});
+	}
+	
+	private boolean changePrice(Path pathForWorkingFile, String column, String procent) {
+		try {
+			PriceChanger priceChanger = new PriceChanger (pathForWorkingFile, column, procent);
+			if(priceChanger.changeXmlFile()) {
+				localMessage = "Ok";
+			}
+			
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			localMessage = "Failed";
+		}
+		return false;		
 	}
 	
 	private boolean startEqualsTwoExcelFiles () {

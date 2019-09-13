@@ -1,11 +1,24 @@
 package xlsconvertor;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -16,8 +29,50 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 public class ExcelUtils {
+	
+	public static boolean saveXmlFile (Document document, Path pathForXmlFile) {
+		try {
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "shops.dtd");
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(new File(JFrameForArgs.pathForWorkingFile.getParent().toString()+"\\" + pathForXmlFile.getFileName()));
+			transformer.transform(source, result);	
+			return true;
+		} catch (TransformerException | TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public static Optional<Document> getXmlDocument (Path pathForFile) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setValidating(false);
+			factory.setNamespaceAware(true);
+			factory.setFeature("http://xml.org/sax/features/namespaces", false);
+			factory.setFeature("http://xml.org/sax/features/validation", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+			factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(pathForFile.toUri().toString());
+			return Optional.of(doc);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			e.printStackTrace();
+			e.getLocalizedMessage();
+			JFrameForArgs.message = "Thomething wrong! Section parse xml file " + e.getLocalizedMessage();
+		}
+		return Optional.empty();
+	}
 
 	public static boolean checkForEqualsRowsAndFormatedCell(Workbook workbook, Set<RowAttributes> collection,
 			Set<RowAttributes> collectionForCheck) {
