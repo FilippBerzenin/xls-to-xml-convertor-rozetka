@@ -1,17 +1,13 @@
 package xlsconvertor;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,8 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,11 +23,12 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.util.SystemOutLogger;
 
 import lombok.Data;
 import lombok.Getter;
@@ -57,87 +52,61 @@ public class ExcelOperator {
 				log.severe("Tomething wrong with WorkbookFactory " + firstPathFoFile + " " + secondPathFoFile);
 				return false;
 			}
-			Set<Row> firstExcelRowsFromSheet  = getRowsFromSheet (workbookFirst.getSheet("price")).get();
-			Set<Row> secondExcelRowsFromSheet  = getRowsFromSheet (workbookSecond.getSheet("price")).get();
-			Row firstRow = this.setFirstRowForGeneralSheet (workbookFirst.getSheet("price").getRow(0), workbookSecond.getSheet("price").getRow(0)).get();
-			
-			
-			
-			//			int artikulNumberForWorkbookFirst = this.findColumnFromName(workbookFirst.getSheet("price"), "Артикул");
-////			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookFirst);
-//			int artikulNumberForWorkbookSecond = this.findColumnFromName(workbookSecond.getSheet("price"), "Артикул");
-////			workbookFirst.getSheet("price").getRow(artikulNumberForWorkbookSecond);
-//			int countDifferentRow = 0;
-//			int v=  workbookFirst.getSheet("price")
-//					.getColumnOutlineLevel(artikulNumberForWorkbookFirst)
-//					;
-//			int i = 1;
-////			boolean flag = true;
-//			while (true) {
-//				if (workbookFirst.getSheet("price").getRow(i) == null ||
-//					workbookSecond.getSheet("price").getRow(i) == null ||
-//					workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst) == null || 
-//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond) == null ||
-//					workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst) == null || 
-//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond) == null) {
-//					break;
-//				}
-//				Cell cell1 = workbookFirst.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst);
-//				Cell cell2 = workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookSecond);
-//				String s1 = cell1.getStringCellValue();
-//				String s2 = cell2.getStringCellValue();
-//				i++;
-//
-//				CellStyle styleForEquals = workbookSecond.createCellStyle();
-//				styleForEquals.setFillBackgroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-//				styleForEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG);
-//
-//				CellStyle styleForNoEquals = workbookSecond.createCellStyle();
-//				styleForNoEquals.setFillBackgroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
-//				styleForNoEquals.setFillPattern(FillPatternType.THIN_BACKWARD_DIAG); // LEAST_DOTS
-//
-//				if (s1.equals(s2)) {
-//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
-//							.setCellStyle(styleForEquals);
-//				} else {
-//					countDifferentRow++;
-//					workbookSecond.getSheet("price").getRow(i).getCell(artikulNumberForWorkbookFirst)
-//							.setCellStyle(styleForNoEquals);
-//					JFrameForArgs.message = countDifferentRow + " positions in the file are tinted - "
-//							+ secondPathFoFile;
-//				}
-//			}
-			try (OutputStream fileOut = new FileOutputStream(secondPathFoFile.toFile())) {
-				workbookSecond.write(fileOut);
+			Set<RowAttributes> firstRowAttributesFromWorkBook  = getRowsAttributeFromSheet(workbookFirst.getSheet("price")).get();
+			Set<RowAttributes> secondRowAttributesFromWorkBook  = getRowsAttributeFromSheet(workbookSecond.getSheet("price")).get();
+			if (ExcelUtils.checkForEqualsRowsAndFormatedCell(workbookFirst, firstRowAttributesFromWorkBook, secondRowAttributesFromWorkBook) &&
+				ExcelUtils.checkForEqualsRowsAndFormatedCell(workbookSecond, secondRowAttributesFromWorkBook, firstRowAttributesFromWorkBook) &&
+				ExcelUtils.copyNewValueIntoFile(firstPathFoFile, workbookFirst) && 
+				ExcelUtils.copyNewValueIntoFile(secondPathFoFile, workbookSecond)) {
+				JFrameForArgs.message = "Ok";
+				return true;	
 			}
-			return true;
 		} catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
 			e.printStackTrace();
 			JFrameForArgs.message = "Thomething wrong, maybe you don't close file before operation?";
 			return false;
 		}
+		return false;
 	}
 	
-	private Optional<Row> setFirstRowForGeneralSheet (Row first, Row second) {
-		List<СolumnName> rezult;
-		List<СolumnName> stringsFromFirstRow = getListOfStringFromRow(first).get();
-		List<СolumnName> stringsFromSecondRow = getListOfStringFromRow(second).get();
-		if (Collections.disjoint(stringsFromFirstRow, stringsFromSecondRow)) {
-			return Optional.of(first);
+	private Optional<Set<RowAttributes>> getRowsAttributeFromSheet (Sheet sheet) {
+		Set<RowAttributes> rows = new HashSet<>();
+		int indexOfColumn = findColumnFromName(sheet, "Название товара");
+		sheet.forEach(row -> {
+		if (row != null && row.getRowNum() != 0 && row.getCell(indexOfColumn) != null) {
+			if (row.getCell(indexOfColumn).getCellTypeEnum().equals(CellType.STRING) && !row.getCell(indexOfColumn).getStringCellValue().isEmpty()) {
+				rows.add(new RowAttributes(row.getRowNum(), row.getCell(indexOfColumn).getStringCellValue()));
+				}
+			else if (row.getCell(indexOfColumn).getCellTypeEnum().equals(CellType.FORMULA)) {
+				
+			}
 		}
-		else {	
-		rezult = new ArrayList<> (
-				Stream.of(stringsFromFirstRow, stringsFromSecondRow)
-				.flatMap(List::stream)
-				.collect(Collectors.toMap(СolumnName::getName,
-						name -> name,
-						(СolumnName x, СolumnName y) -> x == null ? y : x))
-				.values());		
-		rezult.stream().sorted().forEach(System.out::println);
+
+		});
+		return Optional.of(rows);
 		
-		return Optional.of(first);
 	}
-	}
+	
+//	private Optional<Row> setFirstRowForGeneralSheet (Row first, Row second) {
+//		List<СolumnName> rezult;
+//		List<СolumnName> stringsFromFirstRow = getListOfStringFromRow(first).get();
+//		List<СolumnName> stringsFromSecondRow = getListOfStringFromRow(second).get();
+//		if (Collections.disjoint(stringsFromFirstRow, stringsFromSecondRow)) {
+//			return Optional.of(first);
+//		}
+//		else {	
+//		rezult = new ArrayList<> (
+//				Stream.of(stringsFromFirstRow, stringsFromSecondRow)
+//				.flatMap(List::stream)
+//				.collect(Collectors.toMap(СolumnName::getName,
+//						name -> name,
+//						(СolumnName x, СolumnName y) -> x == null ? y : x))
+//				.values());		
+//		rezult.stream().sorted().forEach(System.out::println);
+//		
+//		return Optional.of(first);
+//	}
+//	}
 	
 //	private List<СolumnName> sortedAndGiveRealIndexForCollection (List<СolumnName> collection) {
 //		collection = collection
@@ -171,38 +140,38 @@ public class ExcelOperator {
 //		return collection;
 //	}
 	
-	@Data
-	class СolumnName implements Comparable<СolumnName> {
-		private String name;
-		private int column;		
-
-		public СolumnName(int column, String name) {
-			this.name = name;
-			this.column = column;
-		}
-
-		@Override
-		public int compareTo(СolumnName o) {
-			return (this.column - o.column);
-		}	
-	}
+//	@Data
+//	class СolumnName implements Comparable<СolumnName> {
+//		private String name;
+//		private int column;		
+//
+//		public СolumnName(int column, String name) {
+//			this.name = name;
+//			this.column = column;
+//		}
+//
+//		@Override
+//		public int compareTo(СolumnName o) {
+//			return (this.column - o.column);
+//		}	
+//	}
 	
-	private Optional<List<СolumnName>> getListOfStringFromRow(Row row) {
-		List<СolumnName> stringValues = new ArrayList<>(); 
-		row.forEach(r -> {
-			stringValues.add(new СolumnName(r.getColumnIndex(), r.toString()));
-		});
-		return Optional.of(stringValues);
-	}
-	
-	private int getNumberOfCells(Row row) {
-		return row.getPhysicalNumberOfCells();
-	}
+//	private Optional<List<СolumnName>> getListOfStringFromRow(Row row) {
+//		List<СolumnName> stringValues = new ArrayList<>(); 
+//		row.forEach(r -> {
+//			stringValues.add(new СolumnName(r.getColumnIndex(), r.toString()));
+//		});
+//		return Optional.of(stringValues);
+//	}
+//	
+//	private int getNumberOfCells(Row row) {
+//		return row.getPhysicalNumberOfCells();
+//	}
 	
 	private Optional<Set<Row>> getRowsFromSheet (Sheet sheet) {
 		Set<Row> rows = new HashSet<>();
 		int indexOfColumn = findColumnFromName(sheet, "Наличие");
-		System.out.println(getLastColumnNum(sheet, indexOfColumn));
+		System.out.println(getLastRowNum(sheet, indexOfColumn));
 		sheet.forEach(row -> {
 		if (row != null && row.getCell(indexOfColumn) != null && !row.getCell(indexOfColumn).getStringCellValue().isEmpty() && 
 				!row.getCell(indexOfColumn).getStringCellValue().equals("Наличие")) {
@@ -279,7 +248,7 @@ public class ExcelOperator {
 
 	private void setCategoriesShop(Sheet sheet) {
 		categories = new TreeMap<Integer, String>();
-		int coumtOfRows = this.getLastColumnNum(sheet, this.findColumnFromName(sheet, "ID категоии"));
+		int coumtOfRows = this.getLastRowNum(sheet, this.findColumnFromName(sheet, "ID категоии"));
 		for (int i = 1; i < coumtOfRows; i++) {
 			String cou = sheet.getRow(i).getCell(this.findColumnFromName(sheet, "ID категоии")).toString();
 			Integer in = Integer.parseInt(cou.substring(0, cou.indexOf('.')));
@@ -290,7 +259,7 @@ public class ExcelOperator {
 	private void setOffers(Sheet sheet) {
 		try {
 		offers = new TreeMap<Integer, Item>();
-		int countOfRows = getLastColumnNum(sheet, this.findColumnFromName(sheet, "Категория товара"));
+		int countOfRows = getLastRowNum(sheet, this.findColumnFromName(sheet, "Категория товара"));
 		int start = 8;
 		for (int i = 1; i < countOfRows; i++) {
 			Cell numberId = sheet.getRow(i).getCell(start);
@@ -331,7 +300,7 @@ public class ExcelOperator {
 		System.out.println("ok");
 	}
 
-	public int getLastColumnNum(Sheet sheet, int numberOfColumn) {
+	public int getLastRowNum(Sheet sheet, int numberOfColumn) {
 		int rowCount = 0;
 		Iterator<Row> rows = sheet.iterator();
 		while (rows.hasNext()) {

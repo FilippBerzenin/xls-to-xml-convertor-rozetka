@@ -90,7 +90,7 @@ public class JFrameForArgs {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					pathForWorkingFile = Paths.get(pathToFile.getText());
-					if (!selectEqaulsMode && !checkIfExcelFiles(pathForWorkingFile)) {
+					if (!selectEqaulsMode && checkIfExcelFiles(pathForWorkingFile)) {
 						localMessage = "This is not Excel file.";
 						label1.setText(localMessage);
 					} else if (!selectEqaulsMode) {
@@ -173,7 +173,7 @@ public class JFrameForArgs {
 	
 	private boolean checkIfXmlFiles (Path xmlFiles) {
 		if (Files.isRegularFile(xmlFiles) && 
-				xmlFiles.endsWith("xml")) {
+				xmlFiles.toString().endsWith("xml")) {
 			return true;
 		} else {
 			return false;
