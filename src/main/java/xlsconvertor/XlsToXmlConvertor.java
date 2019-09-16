@@ -117,6 +117,7 @@ public class XlsToXmlConvertor implements Callable<String> {
 	private int counterOfOffers;
 
 	private Document setOffersListFromXmlFile(Document document, Element root) {
+		try {
 		ExcelOperator.getOffers().forEach((key, value) -> {
 			Element offer = document.createElement("offer");
 			String available = value.getAvailable().equals("Есть") ? "true" : "false";
@@ -176,6 +177,10 @@ public class XlsToXmlConvertor implements Callable<String> {
 			counterOfOffers++;
 		});
 		JFrameForArgs.message =JFrameForArgs.message+ "Add : "+counterOfOffers+ " offers"+"\n";
+		return document;
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
 		return document;
 	}
 	

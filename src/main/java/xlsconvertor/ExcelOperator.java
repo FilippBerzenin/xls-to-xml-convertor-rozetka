@@ -189,7 +189,7 @@ public class ExcelOperator {
 			}
 			System.out.println("Retrieving Sheets using Java 8 forEach with lambda");
 			workbook.forEach(sheet -> {
-				System.out.println("=> " + sheet.getSheetName());
+//				System.out.println("=> " + sheet.getSheetName());
 				if (sheet.getSheetName().equals("name shop")) {
 					this.setPropertiesForElementsShop(sheet);
 				}
@@ -256,15 +256,31 @@ public class ExcelOperator {
 		}
 	}
 
+	int indexForRow = 0;
+	int id;
+	
 	private void setOffers(Sheet sheet) {
 		try {
 		offers = new TreeMap<Integer, Item>();
 		int countOfRows = getLastRowNum(sheet, this.findColumnFromName(sheet, "Категория товара"));
+//		System.out.println(countOfRows+" total row");
 		int start = 8;
-		for (int i = 1; i < countOfRows; i++) {
+		int i = 1;
+		for (i = 1; i < countOfRows; i++) {
+			System.out.println(i+" row");
+//			if (i==1776) {
+//				System.out.println(i+" row");
+//			}
 			Cell numberId = sheet.getRow(i).getCell(start);
 			Map<String, String> parameters = new HashMap<>();
-			for (int k = this.findColumnFromName(sheet, "Вид"); k < sheet.getRow(0).getLastCellNum(); k++) {
+			int startPositionForParametrs = this.findColumnFromName(sheet, "Вид");
+//			System.out.println(startPositionForParametrs+" startPositionForParametrs");
+			int lastColumnForParametrs  = sheet.getRow(0).getLastCellNum();
+			for (int k = startPositionForParametrs; k < lastColumnForParametrs; k++) {
+//				System.out.println(startPositionForParametrs+" start "+k+" position"+ lastColumnForParametrs);
+//				if (k==42) {
+//					System.out.println("stop");
+//				}
 				String rezult = this.getValueFromCell(sheet.getRow(i).getCell(k));
 				if (rezult.equals("error")) {
 					continue;
@@ -274,6 +290,7 @@ public class ExcelOperator {
 				}
 			}
 			int in = (int) numberId.getNumericCellValue();
+			id = in;
 			Item item = Item.builder().ID(in)
 					.available(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Наличие")).getStringCellValue())
 					.price_old(this
@@ -293,9 +310,11 @@ public class ExcelOperator {
 							sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Описание")).getStringCellValue()))
 					.parameters(parameters).build();
 			offers.put(in, item);
+			indexForRow = i;
 		}
 		} catch (RuntimeException e) {
 			e.printStackTrace();
+			JFrameForArgs.message = "Error in row number " + (indexForRow+2)+" ID "+id+"\n";
 		}
 		System.out.println("ok");
 	}
@@ -327,16 +346,19 @@ public class ExcelOperator {
 			return num.getStringCellValue();
 		}
 		if (num.getCellTypeEnum().equals(CellType.NUMERIC)) {
-			double d = (double) num.getNumericCellValue();
-			value = Double.toString(d);
-			String s = value.substring(value.indexOf(".") + 1);
-			int h = Integer.parseInt(s);
-			if (h > 0) {
+			long d = (long) num.getNumericCellValue();
+			value = Long.toString(d);
+//			String s = value;
+//			if (value.contains(".")) {
+//				s = value.substring(value.indexOf(".") + 1);	
+//			}
+//			long h = Integer.parseInt(s);
+//			if (h > 0) {
 				return value;
-			} else {
-				String f = value.substring(0, value.indexOf("."));
-				return f;
-			}
+//			} else {
+//				String f = value.substring(0, value.indexOf("."));
+//				return f;
+//			}
 		}
 		} catch (RuntimeException e) {
 			e.printStackTrace();
