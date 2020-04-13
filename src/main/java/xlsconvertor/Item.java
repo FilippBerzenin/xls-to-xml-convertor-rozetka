@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class Item {
 	
-	private int ID;
+	private String ID;
 	
 	private String available;
 	
@@ -25,6 +25,8 @@ public class Item {
 	private String currencyId;
 	
 	private String categoryId;
+	
+	private int categoryIdNum;
 	
 	private String[] linksForPicture;
 	

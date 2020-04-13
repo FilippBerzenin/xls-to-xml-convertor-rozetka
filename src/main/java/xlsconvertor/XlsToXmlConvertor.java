@@ -124,10 +124,10 @@ public class XlsToXmlConvertor implements Callable<String> {
 			offer.setAttribute("available", available);
 			offer.setAttribute("id", key.toString());
 
-			Element price_old = document.createElement("price_old");
-			String priceOld = value.getPrice_old();
-			price_old.setTextContent(priceOld);
-			offer.appendChild(price_old);
+//			Element price_old = document.createElement("price_old");
+//			String priceOld = value.getPrice_old();
+//			price_old.setTextContent(priceOld);
+//			offer.appendChild(price_old);
 
 			Element price = document.createElement("price");
 			String priceNew = value.getPrice();
@@ -137,8 +137,10 @@ public class XlsToXmlConvertor implements Callable<String> {
 			Element currencyId = document.createElement("currencyId");
 			currencyId.setTextContent(value.getCurrencyId());
 			offer.appendChild(currencyId);
+			
 			Element categoryId = document.createElement("categoryId");
-			categoryId.setTextContent(value.getCategoryId());
+			categoryId.setTextContent(Integer.toString(value.getCategoryIdNum()));
+		
 			offer.appendChild(categoryId);
 			for (String linksForPicture : value.getLinksForPicture()) {
 				Element picture = document.createElement("picture");

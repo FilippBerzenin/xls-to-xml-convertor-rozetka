@@ -292,6 +292,8 @@ public class JFrameForArgs {
 	}
 	
 	private void startXlsToXmlConvertor(Path pathForExcelFile) {
+//		DiscriptionChanger d = new DiscriptionChanger();
+//		d.createExcelWorkbookSheetTemplateAndEnterValues(pathForExcelFile);
 		log.info("File (Excel): " + pathForExcelFile);
 		convertor = new XlsToXmlConvertor(pathForExcelFile);
 		convertor.run();

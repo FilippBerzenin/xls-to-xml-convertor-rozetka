@@ -359,7 +359,7 @@ public class XmlToXlsConvertor implements Callable<Boolean> {
 					}
 				}
 			}
-				item.setID(Integer.parseInt(categoriesElements.item(i).getAttributes().getNamedItem("id").getNodeValue()));
+				item.setID(categoriesElements.item(i).getAttributes().getNamedItem("id").getNodeValue());
 				item.setAvailable(categoriesElements.item(i).getAttributes().getNamedItem("available").getNodeValue().equals("true") ? "Есть" : "Нет");
 				item.setLinksForPicture(linksforPicture.toArray(new String[linksforPicture.size()]));
 				items.add(item);	

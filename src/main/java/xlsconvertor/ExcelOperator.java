@@ -42,7 +42,7 @@ public class ExcelOperator {
 	@Getter
 	public static Map<Integer, String> categories;
 	@Getter
-	public static Map<Integer, Item> offers;
+	public static Map<String, Item> offers;
 //	private int startColumn = 8;
 
 	public boolean equalsTwoExcelFiles(Path firstPathFoFile, Path secondPathFoFile) {
@@ -257,30 +257,21 @@ public class ExcelOperator {
 	}
 
 	int indexForRow = 0;
-	int id;
+	String id;
 	
 	private void setOffers(Sheet sheet) {
 		try {
-		offers = new TreeMap<Integer, Item>();
+		offers = new TreeMap<String, Item>();
 		int countOfRows = getLastRowNum(sheet, this.findColumnFromName(sheet, "Категория товара"));
-//		System.out.println(countOfRows+" total row");
 		int start = 8;
 		int i = 1;
 		for (i = 1; i < countOfRows; i++) {
 			System.out.println(i+" row");
-//			if (i==1776) {
-//				System.out.println(i+" row");
-//			}
 			Cell numberId = sheet.getRow(i).getCell(start);
 			Map<String, String> parameters = new HashMap<>();
-			int startPositionForParametrs = this.findColumnFromName(sheet, "Вид");
-//			System.out.println(startPositionForParametrs+" startPositionForParametrs");
+			int startPositionForParametrs = this.findColumnFromName(sheet, "Weight");
 			int lastColumnForParametrs  = sheet.getRow(0).getLastCellNum();
-			for (int k = startPositionForParametrs; k < lastColumnForParametrs; k++) {
-//				System.out.println(startPositionForParametrs+" start "+k+" position"+ lastColumnForParametrs);
-//				if (k==42) {
-//					System.out.println("stop");
-//				}
+			for (int k = startPositionForParametrs; k < 26; k++) {
 				String rezult = this.getValueFromCell(sheet.getRow(i).getCell(k));
 				if (rezult.equals("error")) {
 					continue;
@@ -289,18 +280,32 @@ public class ExcelOperator {
 							this.getValueFromCell(sheet.getRow(i).getCell(k)));
 				}
 			}
-			int in = (int) numberId.getNumericCellValue();
+			for (int k = 26; k < lastColumnForParametrs; k+=2) {
+				Row r = sheet.getRow(i);
+				Cell c = r.getCell(k);
+				String rezult = this.getValueFromCell(sheet.getRow(i).getCell(k));
+				if (rezult.equals("error")) {
+					continue;
+				} else {
+					parameters.put(sheet.getRow(i).getCell(k).getStringCellValue(),
+							this.getValueFromCell(sheet.getRow(i).getCell(k+1)));
+				}
+			}
+			String in = numberId.getStringCellValue();
 			id = in;
-			Item item = Item.builder().ID(in)
-					.available(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Наличие")).getStringCellValue())
+			Item item = Item.builder()
+					.ID(in)
+					.available(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Количество")).getNumericCellValue()>0 ? "Есть" : "Нет")
 					.price_old(this
 							.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Старая цена"))))
 					.price(this.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Новая цена"))))
 					.currencyId(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Валюта")).getStringCellValue())
 					.categoryId(this.getValueFromCell(
 							sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Категория товара"))))
+					.categoryIdNum((int)(
+							sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Номер категории"))).getNumericCellValue())
 					.linksForPicture(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Фото товара"))
-							.getStringCellValue().split("\n"))
+							.getStringCellValue().split(" "))
 					.stock_quantity(this
 							.getValueFromCell(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Количество"))))
 					.vendor(sheet.getRow(i).getCell(this.findColumnFromName(sheet, "Бренд")).getStringCellValue())
